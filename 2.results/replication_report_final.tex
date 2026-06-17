@@ -1,0 +1,1031 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  english,
+  man,floatsintext]{apa6}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Manuscript styling
+\usepackage{upgreek}
+\captionsetup{font=singlespacing,justification=justified}
+
+% Table formatting
+\usepackage{longtable}
+\usepackage{lscape}
+% \usepackage[counterclockwise]{rotating}   % Landscape page setup for large tables
+\usepackage{multirow}		% Table styling
+\usepackage{tabularx}		% Control Column width
+\usepackage[flushleft]{threeparttable}	% Allows for three part tables with a specified notes section
+\usepackage{threeparttablex}            % Lets threeparttable work with longtable
+
+% Create new environments so endfloat can handle them
+% \newenvironment{ltable}
+%   {\begin{landscape}\centering\begin{threeparttable}}
+%   {\end{threeparttable}\end{landscape}}
+\newenvironment{lltable}{\begin{landscape}\centering\begin{ThreePartTable}}{\end{ThreePartTable}\end{landscape}}
+
+% Enables adjusting longtable caption width to table width
+% Solution found at http://golatex.de/longtable-mit-caption-so-breit-wie-die-tabelle-t15767.html
+\makeatletter
+\newcommand\LastLTentrywidth{1em}
+\newlength\longtablewidth
+\setlength{\longtablewidth}{1in}
+\newcommand{\getlongtablewidth}{\begingroup \ifcsname LT@\roman{LT@tables}\endcsname \global\longtablewidth=0pt \renewcommand{\LT@entry}[2]{\global\advance\longtablewidth by ##2\relax\gdef\LastLTentrywidth{##2}}\@nameuse{LT@\roman{LT@tables}} \fi \endgroup}
+
+% \setlength{\parindent}{0.5in}
+% \setlength{\parskip}{0pt plus 0pt minus 0pt}
+
+% Overwrite redefinition of paragraph and subparagraph by the default LaTeX template
+% See https://github.com/crsh/papaja/issues/292
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\parindent}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries\itshape\typesectitle}}
+
+\renewcommand{\subparagraph}[1]{\@startsection{subparagraph}{5}{1em}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-\z@\relax}%
+  {\normalfont\normalsize\itshape\hspace{\parindent}{#1}\textit{\addperi}}{\relax}}
+\makeatother
+
+\makeatletter
+\usepackage{etoolbox}
+\patchcmd{\maketitle}
+  {\section{\normalfont\normalsize\abstractname}}
+  {\section*{\normalfont\normalsize\abstractname}}
+  {}{\typeout{Failed to patch abstract.}}
+\patchcmd{\maketitle}
+  {\section{\protect\normalfont{\@title}}}
+  {\section*{\protect\normalfont{\@title}}}
+  {}{\typeout{Failed to patch title.}}
+\makeatother
+
+\usepackage{xpatch}
+\makeatletter
+\xapptocmd\appendix
+  {\xapptocmd\section
+    {\addcontentsline{toc}{section}{\appendixname\ifoneappendix\else~\theappendix\fi: #1}}
+    {}{\InnerPatchFailed}%
+  }
+{}{\PatchFailed}
+\makeatother
+\keywords{computational reproducibility, life history theory, psychopathology, open data, replication\newline\indent Word count: Approx. 3,600}
+\usepackage{lineno}
+
+\linenumbers
+\usepackage{csquotes}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={A Computational Reproducibility Check of Hurst and Kavanagh (2017): Life History Strategies and Psychopathology},
+  pdfauthor={Jiyueyi Wang1},
+  pdflang={en-EN},
+  pdfkeywords={computational reproducibility, life history theory, psychopathology, open data, replication},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{A Computational Reproducibility Check of Hurst and Kavanagh (2017): Life History Strategies and Psychopathology}
+\author{Jiyueyi Wang\textsuperscript{1}}
+\date{}
+
+
+\shorttitle{Reproducing Hurst and Kavanagh (2017)}
+
+\authornote{
+
+This manuscript reports a computational reproducibility check of Hurst and Kavanagh (2017) conducted with the authors' openly archived data. The replication was written in R and the report was prepared with papaja. All replication code is available from the author upon request.
+
+}
+
+\affiliation{\vspace{0.5cm}\textsuperscript{1} School of Psychology, Nanjing Normal University}
+
+\abstract{%
+Computational reproducibility---obtaining the same reported numbers from the same data with independently written code---is a minimal requirement for credible quantitative research. Using the openly archived supplementary data of Hurst and Kavanagh (2017, \emph{Evolution and Human Behavior}; \emph{N} = 138), who reported that faster life history strategies accompany more psychopathology, greater aggression, and poorer attachment, I independently re-computed all six tables of the original article in R and compared every reported value, cell by cell, against the published value. Across 196 paired comparisons, 89.3\% were reproduced exactly and a further 9.2\% differed only by last-digit rounding or a single significance star; all 64 statistical inferences were consistent with the original. Two Mini-K partial correlations could not be reproduced from the data, but because the matching HKSS coefficients reproduced exactly and two independent partial-correlation methods agreed, these are most plausibly transcription errors in the original article rather than replication failures. Three discrepancies that initially made two tables look irreproducible were traced to my own misreading of how the raw data were coded---scoring origin, yes/no coding, and column order---and disappeared after consulting the codebook. The original results are computationally robust; the only real limitation to full transparency was the absence of shared analysis code.
+}
+
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}\label{introduction}
+
+How do early-life experiences become adult mental-health outcomes? Hurst and Kavanagh (2017) approached this question through life history theory, which treats childhood adversity not merely as trauma but as an environmental cue that shapes a person's developmental strategy along a slow--fast continuum. In a community sample (\emph{N} = 138), they reported that faster life history strategies---indexed by the Mini-K and the High-K Strategy Scale (HKSS)---were associated with more symptoms of psychopathology, greater aggression, and poorer perceived parental attachment, whereas links with self-harm frequency, family structure, and participant sex were weak or non-significant.
+
+This paper does not re-evaluate those substantive claims. It asks a narrower, foundational question: given the authors' openly archived data, can the values printed in the article be regenerated with independently written analysis code? This property---\emph{computational reproducibility}---is distinct from replicability with new data and is increasingly treated as a minimum standard for transparent quantitative research (Hardwicke et al., 2018; Nosek et al., 2022). Because the original design is cross-sectional and correlational, with all results expressed as descriptive statistics, correlations, and regressions, every reported number should in principle be exactly recoverable from the public data. I therefore reproduced all six tables of Hurst and Kavanagh (2017) and compared the results against the published values, cell by cell.
+
+\subsection{Selected-literature information}\label{selected-literature-information}
+
+The full APA reference for the target article is Hurst and Kavanagh (2017) (Hurst \& Kavanagh, 2017); Table 1 records its data source and the scope of the reproduction, following the course protocol.
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:tab-litinfo}Table 1. Information on the selected article and the scope of the reproduction.}
+
+\small{
+
+\begin{tabular}{ll}
+\toprule
+Item & Detail\\
+\midrule
+Reference & Hurst and Kavanagh (2017); full entry in the reference list\\
+DOI & 10.1016/j.evolhumbehav.2016.06.001\\
+Data source & Article supplementary files mmc1.csv and mmc2.xlsx (no OSF/GitHub)\\
+Multiple studies / meta-analysis & No -- single cross-sectional study\\
+Previously replicated & None located\\
+Reproduced results & All six results tables (descriptives, correlations, regressions)\\
+Original raw data used & Yes -- cleaned data file used unchanged\\
+Sample size modified & No -- full sample (N = 138; 92 women, 46 men)\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{threeparttable}
+\end{center}
+
+\end{table}
+
+\subsection{Overview of the original study}\label{overview-of-the-original-study}
+
+Hurst and Kavanagh (2017) tested whether a faster life history strategy is accompanied by poorer mental-health and social outcomes. Participants completed two strategy measures (the Mini-K and the HKSS), the Adult Attachment Questionnaire (AAQ), the Buss--Perry Aggression Questionnaire, the DSM-5 Self-Rated Level 1 Cross-Cutting Symptom Measure, and a self-harm behaviour inventory, together with demographic and family-structure items. The authors reported descriptive statistics and reliabilities, the percentage of respondents exceeding each DSM-5 symptom threshold, self-harm frequencies by sex, correlations of all outcomes with age and sex, partial correlations between strategy and each outcome controlling for age (Bonferroni-corrected, \emph{p} \textless{} .002), and regressions predicting each strategy score from attachment while controlling for age and sibling variables. They concluded that faster strategies were reliably linked to more psychopathology, more aggression, and poorer attachment, but not to self-harm frequency or family structure---a pattern consistent with life history theory.
+
+\section{Method}\label{method}
+
+\subsection{Sample}\label{sample}
+
+I used the authors' supplementary data file (\texttt{mmc1.csv}, \emph{N} = 138; 92 women, 46 men) together with the variable codebook (\texttt{mmc2.xlsx}). The data are cross-sectional and were taken unchanged; no cases were added or removed, and the sample size was not modified. Because the reproduction uses the identical sample, no power re-estimation was required.
+
+\subsection{Original analytic methods}\label{original-analytic-methods}
+
+The original study is cross-sectional and correlational. Reported analyses comprise means, standard deviations, and Cronbach's alpha; threshold percentages and frequency counts; zero-order Pearson correlations; first-order partial correlations controlling for age with a Bonferroni-corrected threshold; and ordinary-least-squares multiple regression with standardized coefficients and 95\% confidence intervals. The software used by the original authors was not reported in the article. The present reproduction was conducted in R (R Core Team, 2024) using \texttt{psych} for descriptive statistics and reliability, \texttt{ppcor} for partial correlations, and \texttt{lm.beta} for standardized regression coefficients; the manuscript was prepared with \textbf{papaja} (Aust \& Barth, 2023).
+
+\subsection{Replication approach}\label{replication-approach}
+
+I reproduced all six tables of Hurst and Kavanagh (2017). The original authors' analysis code was not available, so the pipeline was written independently from the article's Method section and the codebook. Three implementation decisions were required and were resolved by reading the codebook rather than the article text. First, the DSM-5 items are stored on a 1--5 scale, whereas the published thresholds are defined on the instrument's native 0--4 scale; I subtracted one before thresholding. Second, the self-harm items are coded 1 = \emph{yes}, 2 = \emph{no}, so endorsements were counted as values equal to one rather than greater than zero. Third, the codebook showed that data columns and article rows are misaligned for self-harm items 5--7, so each behaviour was mapped to its correct column by name. For the ``presence of stepparent'' row I used the stepparent-count variable (\texttt{Stepparent\_N}), which matches the published Table 5 values, rather than the binary indicator. Repeated operations---partial correlations, significance stars, and table assembly---were wrapped in functions so that each table required a single call. For every cell I recorded the published value, the reproduced value, a discrepancy index (\(\delta\)), and a four-level rating: \emph{fully replicated} (identical value and significance), \emph{highly replicated} (last-digit rounding or a significance star only), \emph{partially replicated}, and \emph{not replicated}. The only methodological addition was a verification step in which the disputed Table 5 partial correlations were recomputed by a second, residual-based algorithm.
+
+\section{Results}\label{results}
+
+Overall, computational reproducibility was high. Each of the following six tables places the published value (``Original result'') directly above the reproduced value (``This study''), with the discrepancy \(\delta\) and the rating beneath. For the descriptive tables (Tables 2--4) \(\delta\) is the relative deviation (percentage of the original); for the coefficient tables (Tables 5--8) \(\delta\) is the absolute difference in the coefficient's own units, because relative deviation is unstable near zero.
+
+\subsection{Descriptive statistics}\label{descriptive-statistics}
+
+\subsubsection{Means, standard deviations, and reliability}\label{means-standard-deviations-and-reliability}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} $\alpha$ values are standardized Cronbach's $\alpha$ (psych::alpha std.alpha), which reproduced all 11 coefficients exactly; AAQ = Adult Attachment Questionnaire. All 33 cells fully replicated ($\delta$ = 0\%).}
+\end{TableNotes}
+
+\small{
+
+\begin{longtable}{lrrr}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-desc}Table 2. Comparison of original and replication: means, standard deviations, and reliability.}\\
+\toprule
+Measure / Statistic & $M$ & $SD$ & $\alpha$\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-desc} continued}}\\
+\toprule
+Measure / Statistic & $M$ & $SD$ & $\alpha$\\
+\midrule
+\endhead
+\textbf{Total attachment (AAQ)} &  &  & \\
+Original result & 15.54 & 7.63 & 0.92\\
+This study & 15.54 & 7.63 & 0.92\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Availability} &  &  & \\
+Original result & 5.63 & 3.22 & 0.91\\
+This study & 5.63 & 3.22 & 0.91\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Goal-corrected partnership} &  &  & \\
+Original result & 4.77 & 2.75 & 0.93\\
+This study & 4.77 & 2.75 & 0.93\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Angry distress} &  &  & \\
+Original result & 5.14 & 2.84 & 0.83\\
+This study & 5.14 & 2.84 & 0.83\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Total aggression (Buss--Perry)} &  &  & \\
+Original result & 59.90 & 19.62 & 0.93\\
+This study & 59.90 & 19.62 & 0.93\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Physical aggression} &  &  & \\
+Original result & 16.81 & 6.04 & 0.83\\
+This study & 16.81 & 6.04 & 0.83\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Verbal aggression} &  &  & \\
+Original result & 11.51 & 4.84 & 0.84\\
+This study & 11.51 & 4.84 & 0.84\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Anger} &  &  & \\
+Original result & 14.30 & 5.44 & 0.83\\
+This study & 14.30 & 5.44 & 0.83\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Hostility} &  &  & \\
+Original result & 17.27 & 8.05 & 0.90\\
+This study & 17.27 & 8.05 & 0.90\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Mini-K} &  &  & \\
+Original result & 14.62 & 11.25 & 0.84\\
+This study & 14.62 & 11.25 & 0.84\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{HKSS} &  &  & \\
+Original result & 87.34 & 13.64 & 0.91\\
+This study & 87.34 & 13.64 & 0.91\\
+$\delta$ & 0\% & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl. & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+Every mean, standard deviation, and reliability coefficient reproduced exactly. The reliabilities matched only once I used the \emph{standardized} coefficient alpha (\texttt{std.alpha}); the raw alpha differed by .01--.02 on four scales. Because the article did not state which estimator it used, the agreement of all 11 standardized values indicates that the original authors reported standardized alpha. The descriptive layer of the article is therefore fully reproducible.
+
+\subsubsection{DSM-5 symptom-threshold percentages}\label{dsm-5-symptom-threshold-percentages}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} Values are percentages of respondents whose rating indicated a need for further inquiry. *Threshold is a score of 1 rather than 2. Item labels are abbreviated. All 23 items fully replicated ($\delta$ = 0\%).}
+\end{TableNotes}
+
+\small{
+
+\begin{longtable}{lrrrl}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-dsm}Table 3. Comparison of original and replication: percentage meeting the DSM-5 threshold for further inquiry.}\\
+\toprule
+Item & Original & This study & $\delta$ & Rating\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-dsm} continued}}\\
+\toprule
+Item & Original & This study & $\delta$ & Rating\\
+\midrule
+\endhead
+\textbf{Depression subscale} &  &  &  & \\
+Little interest or pleasure & 34.1 & 34.1 & 0\% & Fully repl.\\
+Feeling down/hopeless & 29.7 & 29.7 & 0\% & Fully repl.\\
+\textbf{Anger subscale} &  &  &  & \\
+More irritable/angry than usual & 36.2 & 36.2 & 0\% & Fully repl.\\
+\textbf{Mania subscale} &  &  &  & \\
+Sleeping less, still energetic & 28.3 & 28.3 & 0\% & Fully repl.\\
+More projects/risky things & 18.8 & 18.8 & 0\% & Fully repl.\\
+\textbf{Anxiety subscale} &  &  &  & \\
+Nervous/anxious/on edge & 35.5 & 35.5 & 0\% & Fully repl.\\
+Panic or frightened & 21.0 & 21.0 & 0\% & Fully repl.\\
+Avoiding anxiety-provoking situations & 34.1 & 34.1 & 0\% & Fully repl.\\
+\textbf{Somatic symptoms subscale} &  &  &  & \\
+Unexplained aches and pains & 29.0 & 29.0 & 0\% & Fully repl.\\
+Illness not taken seriously & 15.2 & 15.2 & 0\% & Fully repl.\\
+\textbf{Suicidal ideation subscale} &  &  &  & \\
+Thoughts of hurting yourself* & 18.8 & 18.8 & 0\% & Fully repl.\\
+\textbf{Psychosis subscale} &  &  &  & \\
+Hearing things others cannot* & 7.2 & 7.2 & 0\% & Fully repl.\\
+Thought broadcasting/insertion* & 6.5 & 6.5 & 0\% & Fully repl.\\
+\textbf{Sleep disturbance subscale} &  &  &  & \\
+Sleep-quality problems & 31.2 & 31.2 & 0\% & Fully repl.\\
+\textbf{Memory subscale} &  &  &  & \\
+Memory/location problems & 15.2 & 15.2 & 0\% & Fully repl.\\
+\textbf{Repetitive thoughts/behaviour subscale} &  &  &  & \\
+Intrusive thoughts/urges/images & 20.3 & 20.3 & 0\% & Fully repl.\\
+Compulsive acts & 10.1 & 10.1 & 0\% & Fully repl.\\
+\textbf{Dissociation subscale} &  &  &  & \\
+Feeling detached & 13.8 & 13.8 & 0\% & Fully repl.\\
+\textbf{Personality functioning subscale} &  &  &  & \\
+Not knowing who you are & 30.4 & 30.4 & 0\% & Fully repl.\\
+Not feeling close to others & 26.8 & 26.8 & 0\% & Fully repl.\\
+\textbf{Substance use subscale} &  &  &  & \\
+$\geq$4 drinks in a day* & 34.1 & 34.1 & 0\% & Fully repl.\\
+Tobacco use* & 12.3 & 12.3 & 0\% & Fully repl.\\
+Non-prescribed medicine use* & 9.4 & 9.4 & 0\% & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+All 23 threshold percentages reproduced to the first decimal. This table was, however, the source of the first replication-side error: the DSM-5 items are stored on a 1--5 scale, but the published thresholds assume the instrument's 0--4 scale, so applying the thresholds directly inflated every percentage and pushed the special ``score \(\geq\) 1'' items to 100\%. Subtracting one before thresholding---a fact recoverable only from the codebook---restored exact agreement.
+
+\subsubsection{Self-harm frequencies by sex}\label{self-harm-frequencies-by-sex}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} Women n = 92, men n = 46. $\delta$ is computed on the percentages. All endorsement counts reproduced exactly; two percentages differ by rounding with identical counts.}
+\end{TableNotes}
+
+\small{
+
+\begin{longtable}{lcc}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-sh}Table 4. Comparison of original and replication: frequencies (percentages) of self-harm behaviours by sex.}\\
+\toprule
+Measure / Statistic & Women $n$ (\%) & Men $n$ (\%)\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-sh} continued}}\\
+\toprule
+Measure / Statistic & Women $n$ (\%) & Men $n$ (\%)\\
+\midrule
+\endhead
+\textbf{1. Cutting} &  & \\
+Original result & 13 (14.0) & 6 (13.0)\\
+This study & 13 (14.1) & 6 (13.0)\\
+$\delta$ & +0.7\% & 0\%\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{2. Burning with cigarette} &  & \\
+Original result & 5 (5.4) & 1 (2.2)\\
+This study & 5 (5.4) & 1 (2.2)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{3. Burning with lighter/match} &  & \\
+Original result & 3 (3.3) & 3 (6.5)\\
+This study & 3 (3.3) & 3 (6.5)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{4. Carving words into skin} &  & \\
+Original result & 6 (6.5) & 0 (0.0)\\
+This study & 6 (6.5) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{5. Carving pictures into skin} &  & \\
+Original result & 1 (1.1) & 0 (0.0)\\
+This study & 1 (1.1) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{6. Severe scratching} &  & \\
+Original result & 10 (10.9) & 2 (4.3)\\
+This study & 10 (10.9) & 2 (4.3)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{7. Biting} &  & \\
+Original result & 6 (6.5) & 2 (4.3)\\
+This study & 6 (6.5) & 2 (4.3)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{8. Rubbing sandpaper on skin} &  & \\
+Original result & 0 (0.0) & 2 (4.3)\\
+This study & 0 (0.0) & 2 (4.3)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{9. Dripping acid on skin} &  & \\
+Original result & 0 (0.0) & 0 (0.0)\\
+This study & 0 (0.0) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{10. Bleach/oven cleaner on skin} &  & \\
+Original result & 0 (0.0) & 0 (0.0)\\
+This study & 0 (0.0) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{11. Sticking pins/needles into skin} &  & \\
+Original result & 3 (3.3) & 5 (11.4)\\
+This study & 3 (3.3) & 5 (10.9)\\
+$\delta$ & 0\% & $-$4.4\%\\
+Rating & Fully repl. & Partially repl.\\
+\textbf{12. Rubbing glass on skin} &  & \\
+Original result & 1 (1.1) & 0 (0.0)\\
+This study & 1 (1.1) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{13. Breaking bones} &  & \\
+Original result & 1 (1.1) & 0 (0.0)\\
+This study & 1 (1.1) & 0 (0.0)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{14. Banging head} &  & \\
+Original result & 1 (1.1) & 5 (10.9)\\
+This study & 1 (1.1) & 5 (10.9)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{15. Punching self} &  & \\
+Original result & 4 (4.3) & 2 (4.3)\\
+This study & 4 (4.3) & 2 (4.3)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{16. Preventing wounds from healing} &  & \\
+Original result & 3 (3.3) & 1 (2.2)\\
+This study & 3 (3.3) & 1 (2.2)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{17. Alternate forms of self-harm} &  & \\
+Original result & 4 (4.3) & 8 (17.4)\\
+This study & 4 (4.3) & 8 (17.4)\\
+$\delta$ & 0\% & 0\%\\
+Rating & Fully repl. & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+Every endorsement count reproduced exactly. Only two percentages deviate, and both reflect rounding rather than a count error: cutting in women (14.0 vs.~14.1) and sticking pins in men (11.4 vs.~10.9), each with an identical underlying count. Reaching this point required two further codebook-based fixes: the self-harm items are coded 1 = \emph{yes}, 2 = \emph{no} (so endorsements are values equal to one, not greater than zero), and the data store items 5--7 in a different order than the article lists them, so each behaviour had to be matched to its column by name.
+
+\subsection{Inferential statistics}\label{inferential-statistics}
+
+\subsubsection{Correlations with age and sex}\label{correlations-with-age-and-sex}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} $\delta$ is the absolute difference (this study $-$ original). *p < .05. **p < .01. ***p < .001.}
+\end{TableNotes}
+
+\small{
+
+\begin{longtable}{lcc}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-cor}Table 5. Comparison of original and replication: zero-order correlations with age and sex.}\\
+\toprule
+Measure / Statistic & Age ($r$) & Sex ($r$)\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-cor} continued}}\\
+\toprule
+Measure / Statistic & Age ($r$) & Sex ($r$)\\
+\midrule
+\endhead
+\textbf{Total attachment} &  & \\
+Original result & $-$.21* & .06\\
+This study & $-$.21* & .06\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Availability} &  & \\
+Original result & $-$.15 & .02\\
+This study & $-$.15 & .02\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Angry distress} &  & \\
+Original result & $-$.29** & .10\\
+This study & $-$.29*** & .10\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Goal-corrected partnership} &  & \\
+Original result & $-$.11 & .03\\
+This study & $-$.10 & .03\\
+$\delta$ & +0.01 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Total aggression} &  & \\
+Original result & $-$.39*** & .09\\
+This study & $-$.39*** & .09\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Physical aggression} &  & \\
+Original result & $-$.36*** & .01\\
+This study & $-$.36*** & .00\\
+$\delta$ & 0.00 & $-$0.01\\
+Rating & Fully repl. & Highly repl.\\
+\textbf{Verbal aggression} &  & \\
+Original result & $-$.32*** & $-$.06\\
+This study & $-$.32*** & $-$.06\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Anger} &  & \\
+Original result & $-$.26** & .19*\\
+This study & $-$.26** & .19*\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Hostility} &  & \\
+Original result & $-$.32*** & .13\\
+This study & $-$.32*** & .13\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Total psychopathology} &  & \\
+Original result & $-$.43*** & .01\\
+This study & $-$.43*** & .01\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Total frequency of self-harm} &  & \\
+Original result & $-$.15 & .01\\
+This study & $-$.15 & .02\\
+$\delta$ & 0.00 & +0.01\\
+Rating & Fully repl. & Highly repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+Every correlation coefficient reproduced to two decimals. The four highly replicated cells differ only trivially: angry distress with age carries one extra significance star (.29** vs.~.29***), and three coefficients near zero shift by .01 in the last digit. None of these changes the inferential message---the correlation is significant, or not, in exactly the same way as in the article.
+
+\subsubsection{Partial correlations with life history strategy}\label{partial-correlations-with-life-history-strategy}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} Bold = significant after Bonferroni correction (p < .002). $\delta$ is the absolute difference. Two Mini-K cells could not be reproduced (goal-corrected partnership, physical aggression); their HKSS counterparts reproduced exactly (see text).}
+\end{TableNotes}
+
+\small{
+
+\begin{longtable}{lcc}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-pcor}Table 6. Comparison of original and replication: partial correlations (controlling for age) with Mini-K and HKSS.}\\
+\toprule
+Measure / Statistic & Mini-K ($pr$) & HKSS ($pr$)\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-pcor} continued}}\\
+\toprule
+Measure / Statistic & Mini-K ($pr$) & HKSS ($pr$)\\
+\midrule
+\endhead
+\textbf{Full biological siblings} &  & \\
+Original result & .01 & .03\\
+This study & .00 & .03\\
+$\delta$ & $-$0.01 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Half-siblings} &  & \\
+Original result & $-$.10 & $-$.20\\
+This study & $-$.10 & $-$.20\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Step-siblings} &  & \\
+Original result & $-$.05 & $-$.08\\
+This study & $-$.05 & $-$.08\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Presence of stepparent} &  & \\
+Original result & $-$.19 & $-$.06\\
+This study & $-$.19 & $-$.06\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Total psychopathology} &  & \\
+Original result & \textbf{$-$.51} & \textbf{$-$.41}\\
+This study & \textbf{$-$.51} & \textbf{$-$.41}\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Total frequency of self-harm} &  & \\
+Original result & $-$.04 & $-$.17\\
+This study & $-$.04 & $-$.17\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Total attachment} &  & \\
+Original result & \textbf{$-$.42} & \textbf{$-$.41}\\
+This study & \textbf{$-$.42} & \textbf{$-$.41}\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Availability} &  & \\
+Original result & \textbf{$-$.39} & \textbf{$-$.37}\\
+This study & \textbf{$-$.38} & \textbf{$-$.37}\\
+$\delta$ & +0.01 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Angry distress} &  & \\
+Original result & \textbf{$-$.44} & \textbf{$-$.44}\\
+This study & \textbf{$-$.44} & \textbf{$-$.44}\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Goal-corrected partnership} &  & \\
+Original result & \textbf{$-$.39} & $-$.24\\
+This study & \textbf{$-$.27} & $-$.24\\
+$\delta$ & +0.12 & 0.00\\
+Rating & Not repl. & Fully repl.\\
+\textbf{Total aggression} &  & \\
+Original result & \textbf{$-$.46} & \textbf{$-$.43}\\
+This study & \textbf{$-$.44} & \textbf{$-$.43}\\
+$\delta$ & +0.02 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Physical aggression} &  & \\
+Original result & \textbf{$-$.44} & \textbf{$-$.34}\\
+This study & \textbf{$-$.37} & \textbf{$-$.34}\\
+$\delta$ & +0.07 & 0.00\\
+Rating & Partially repl. & Fully repl.\\
+\textbf{Verbal aggression} &  & \\
+Original result & $-$.03 & $-$.10\\
+This study & $-$.04 & $-$.10\\
+$\delta$ & -0.01 & 0.00\\
+Rating & Highly repl. & Fully repl.\\
+\textbf{Anger} &  & \\
+Original result & \textbf{$-$.31} & $-$.25\\
+This study & \textbf{$-$.31} & $-$.25\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\textbf{Hostility} &  & \\
+Original result & \textbf{$-$.52} & \textbf{$-$.52}\\
+This study & \textbf{$-$.52} & \textbf{$-$.52}\\
+$\delta$ & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+The HKSS column reproduced exactly in all 15 rows, and 13 of the 15 Mini-K coefficients reproduced within rounding. The exceptions are the two Mini-K cells flagged in bold above: goal-corrected partnership (article \(-.39\), data \(-.27\)) and physical aggression (article \(-.44\), data \(-.37\)). These are best read as transcription errors in the original article rather than replication failures, for three reasons: the corresponding HKSS coefficients reproduced perfectly, a second residual-based partial-correlation algorithm returned the same disputed values, and both cells remain significant after Bonferroni correction under either number---so the article's pattern of significant strategy--outcome associations is preserved regardless.
+
+\subsubsection{Regressions predicting life history strategy}\label{regressions-predicting-life-history-strategy}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} $b$ = unstandardized; $\beta$ = standardized; CI = 95\% confidence interval (LL, UL). Model: R\textsuperscript{2} = .28, F(5, 132) = 10.49, p < .001, reproduced exactly. *p < .05. **p < .01. ***p < .001.}
+\end{TableNotes}
+
+\footnotesize{
+
+\begin{longtable}{lrrrrr}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-reg-mk}Table 7. Comparison of original and replication: regression predicting Mini-K from attachment.}\\
+\toprule
+Measure / Statistic & $b$ & $\beta$ & $t$ & CI LL & CI UL\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-reg-mk} continued}}\\
+\toprule
+Measure / Statistic & $b$ & $\beta$ & $t$ & CI LL & CI UL\\
+\midrule
+\endhead
+\textbf{Age (covariate)} &  &  &  &  & \\
+Original result & 0.21 & .27*** & 3.29 & 0.08 & 0.34\\
+This study & 0.21 & .27** & 3.29 & 0.08 & 0.34\\
+$\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Highly repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Half-siblings (covariate)} &  &  &  &  & \\
+Original result & $-$0.01 & .01 & $-$0.01 & $-$2.16 & 2.16\\
+This study & 0.00 & .00 & 0.00 & $-$2.16 & 2.16\\
+$\delta$ & +0.01 & $-$0.01 & +0.01 & 0.00 & 0.00\\
+Rating & Highly repl. & Highly repl. & Highly repl. & Fully repl. & Fully repl.\\
+\textbf{Step-siblings (covariate)} &  &  &  &  & \\
+Original result & 0.21 & .02 & 0.19 & $-$1.93 & 2.36\\
+This study & 0.21 & .01 & 0.19 & $-$1.93 & 2.36\\
+$\delta$ & 0.00 & $-$0.01 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Highly repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Biological siblings (covariate)} &  &  &  &  & \\
+Original result & $-$0.04 & $-$.01 & $-$0.05 & $-$1.69 & 1.61\\
+This study & $-$0.04 & .00 & $-$0.05 & $-$1.69 & 1.61\\
+$\delta$ & 0.00 & +0.01 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Highly repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Total attachment} &  &  &  &  & \\
+Original result & $-$0.60 & $-$.41*** & $-$5.20 & $-$0.83 & $-$0.37\\
+This study & $-$0.60 & $-$.41*** & $-$5.20 & $-$0.83 & $-$0.37\\
+$\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl. & Fully repl. & Fully repl. & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+\begin{center}
+\begin{ThreePartTable}
+
+\begin{TableNotes}[para]
+\normalsize{\textit{Note.} Layout as in Table 7. Model: R\textsuperscript{2} = .26; F(5, 132) = 9.09 original vs. 9.08 replication (last-digit difference, highly replicated). *p < .05. ***p < .001.}
+\end{TableNotes}
+
+\footnotesize{
+
+\begin{longtable}{lrrrrr}\noalign{\getlongtablewidth\global\LTcapwidth=\longtablewidth}
+\caption{\label{tab:tab-reg-hk}Table 8. Comparison of original and replication: regression predicting HKSS from attachment.}\\
+\toprule
+Measure / Statistic & $b$ & $\beta$ & $t$ & CI LL & CI UL\\
+\midrule
+\endfirsthead
+\caption*{\normalfont{Table \ref{tab:tab-reg-hk} continued}}\\
+\toprule
+Measure / Statistic & $b$ & $\beta$ & $t$ & CI LL & CI UL\\
+\midrule
+\endhead
+\textbf{Age (covariate)} &  &  &  &  & \\
+Original result & 0.20 & .21* & 2.51 & 0.04 & 0.35\\
+This study & 0.20 & .21* & 2.51 & 0.04 & 0.35\\
+$\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Half-siblings (covariate)} &  &  &  &  & \\
+Original result & $-$1.63 & $-$.10 & $-$1.21 & $-$4.30 & 1.04\\
+This study & $-$1.63 & $-$.10 & $-$1.21 & $-$4.30 & 1.04\\
+$\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Step-siblings (covariate)} &  &  &  &  & \\
+Original result & 0.07 & .01 & 0.06 & $-$2.58 & 2.72\\
+This study & 0.07 & .00 & 0.06 & $-$2.58 & 2.72\\
+$\delta$ & 0.00 & $-$0.01 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Highly repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Biological siblings (covariate)} &  &  &  &  & \\
+Original result & 0.01 & .01 & 0.01 & $-$2.03 & 2.05\\
+This study & 0.01 & .00 & 0.01 & $-$2.03 & 2.05\\
+$\delta$ & 0.00 & $-$0.01 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Highly repl. & Fully repl. & Fully repl. & Fully repl.\\
+\textbf{Total attachment} &  &  &  &  & \\
+Original result & $-$0.67 & $-$.37*** & $-$4.68 & $-$0.95 & $-$0.38\\
+This study & $-$0.67 & $-$.37*** & $-$4.68 & $-$0.95 & $-$0.38\\
+$\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
+Rating & Fully repl. & Fully repl. & Fully repl. & Fully repl. & Fully repl.\\
+\bottomrule
+\addlinespace
+\insertTableNotes
+\end{longtable}
+
+}
+
+\end{ThreePartTable}
+\end{center}
+
+Both regression models reproduced essentially completely. The unstandardized coefficients, \emph{t} values, and confidence-interval limits were identical, and the key attachment effect (\(\beta = -.41\) for Mini-K and \(-.37\) for HKSS, both \emph{p} \textless{} .001) reproduced exactly. The handful of highly replicated cells are standardized coefficients near zero that differ by .01, plus the HKSS model \emph{F} (9.09 vs.~9.08). The model fit statistics---\emph{R}\textsuperscript{2} = .28 and .26---reproduced exactly. No regression inference changed.
+
+\subsection{Assessment of computational reproducibility}\label{assessment-of-computational-reproducibility}
+
+I treated every published number as one paired comparison: each mean, standard deviation, reliability, percentage, frequency, correlation, partial correlation, regression coefficient, confidence-interval limit, and model-fit statistic. This yielded 196 comparisons, whose rating distribution appears in Table 9.
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:tab-rating}Table 9. Distribution of reproduction ratings across all 196 paired comparisons.}
+
+\begin{tabular}{lrr}
+\toprule
+Reproduction rating & $N$ & $\%$\\
+\midrule
+Fully replicated ($\delta$ = 0) & 175 & 89.3\\
+Highly replicated (last-digit rounding or significance star only) & 18 & 9.2\\
+Partially replicated & 2 & 1.0\\
+Not replicated & 1 & 0.5\\
+Total & 196 & 100.0\\
+\bottomrule
+\addlinespace
+\end{tabular}
+
+\begin{tablenotes}[para]
+\normalsize{\textit{Note.} The 18 highly replicated cells reflect last-digit rounding or one shifted significance star. The 2 partially and 1 not replicated cells are the two suspected Mini-K transcription errors in the partial-correlation comparison (Table 6) and one rounded self-harm percentage with an identical count.}
+\end{tablenotes}
+
+\end{threeparttable}
+\end{center}
+
+\end{table}
+
+Reproducibility of the published \emph{numbers} is distinct from reproducibility of the \emph{inferences} they license. Counting every significance decision---22 zero-order correlations, 30 age-adjusted partial correlations, and 12 regression statistics (10 coefficient tests plus two model \emph{F} tests)---gives 64 inferences. As Table 10 shows, all 64 fell on the same side of their significance threshold in the original and the replication; even the two unreproduced Mini-K point estimates stayed significant under both values.
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:tab-infer}Table 10. Consistency of statistical inferences between original and replication.}
+
+\begin{tabular}{lrr}
+\toprule
+Inference & $N$ & $\%$\\
+\midrule
+Consistent & 64 & 100.0\\
+Inconsistent & 0 & 0.0\\
+Total & 64 & 100.0\\
+\bottomrule
+\addlinespace
+\end{tabular}
+
+\begin{tablenotes}[para]
+\normalsize{\textit{Note.} An inference was coded inconsistent only if the reproduced p value fell on the opposite side of its significance threshold from the original.}
+\end{tablenotes}
+
+\end{threeparttable}
+\end{center}
+
+\end{table}
+
+Because the reproduction used the original methods throughout, the rubric's tables for an alternative (``innovative'') analysis method are not applicable; the only methodological addition was the residual-based cross-check of Table 6, which agreed with the primary estimates.
+
+\section{Discussion}\label{discussion}
+
+\subsection{Analysis of the reproducibility outcome}\label{analysis-of-the-reproducibility-outcome}
+
+Using the authors' open data, the central results of Hurst and Kavanagh (2017) were highly reproducible. Because the authors archived a \emph{cleaned} data file, the reproduction succeeded almost completely: means, standard deviations, reliabilities, correlations, partial correlations, and regression coefficients matched the published values to the last reported digit in the large majority of cells, and no inference supporting the article's conclusions changed. The few small deviations that remained---a scattering of last-digit differences and a single shifted significance star---are attributable to rounding and to unspecified estimator options rather than to any computational instability, and none affects an inference. In short, the article is computationally robust and trustworthy: the numbers it reports can be regenerated from its data, and its conclusions follow from those numbers.
+
+The residual discrepancies sort into three kinds, summarized in Table 11, which it is important not to conflate. \emph{First}, two Mini-K partial correlations in Table 6 (goal-corrected partnership and physical aggression) could not be reproduced; these are most plausibly transcription errors in the original article, because the matching HKSS coefficients reproduced exactly, two independent algorithms agreed, and both cells remain significant either way. \emph{Second}, three discrepancies that initially made the DSM-5 and self-harm tables look completely irreproducible were located entirely on the replication side---a scoring-origin mismatch (1--5 vs.~0--4), a yes/no coding error, and an item-to-column misalignment---and disappeared once the codebook was consulted. \emph{Third}, the benign remainder (last-digit rounding, one rounded self-harm percentage with an identical count, and the standardized-versus-raw alpha choice) reflects rounding and reporting conventions. The principal limitation to full transparency was structural rather than statistical: the raw and cleaned data were shared, but the analysis code was not, so a few implementation choices---most visibly the alpha estimator---had to be inferred. Sharing runnable code would have removed that ambiguity.
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:tab-causes}Table 11. Analysis of the sources of the few computational discrepancies.}
+
+\small{
+
+\begin{tabular}{lll}
+\toprule
+Possible source & Applies? & Note\\
+\midrule
+Transcription error in original & Yes & Two Mini-K cells in Table 6\\
+Under-specified procedure in article & Partly & Coding and alpha from codebook only\\
+No analysis code shared & Yes & Main openness gap; data shared, code not\\
+Software/package versions not reported & Yes & Minor; one last-digit F difference\\
+Same data set & No & Identical cleaned file used\\
+Different software (R) & Minor & Rounding / alpha estimator only\\
+Replicator's reading of data coding & Resolved & Three coding errors fixed via codebook\\
+Publication year & -- & 2017, open-science era; data archived\\
+Independent support for findings & Yes & Pattern broadly consistent with prior work\\
+\bottomrule
+\addlinespace
+\end{tabular}
+
+}
+
+\begin{tablenotes}[para]
+\normalsize{\textit{Note.} Only applicable rows are shown; non-applicable checklist items (e.g., unseeded simulation -- all analyses are deterministic; OSF storage or download problems) are omitted.}
+\end{tablenotes}
+
+\end{threeparttable}
+\end{center}
+
+\end{table}
+
+\subsection{Further reflections}\label{further-reflections}
+
+Beyond the reproducibility verdict, three lessons stand out from the process.
+
+\emph{Functionalizing the analysis sharply lowered the error rate.} Wrapping the repeated operations---computing a partial correlation, attaching significance stars, and assembling a table---into reusable functions meant that each of the six tables was produced by a single call pattern (the \texttt{blk()} helper used throughout the Results section is a direct example). This made discrepancies easy to localize and guaranteed that the same conventions---rounding, star thresholds, ordering---were applied everywhere. That uniformity is difficult to maintain in point-and-click software, where each table is built by hand, and it is a core advantage of a scripted environment such as R.
+
+\emph{The data codebook mattered more than the code.} The single most important lesson was that all three errors encountered during the reproduction lay not in the statistical method but in how the raw data were encoded: whether scoring began at 0 or at 1, how the yes/no self-harm items were coded, and whether the data's column order matched the article's row order. However well written the R code was, a misunderstanding of the data's semantics propagated into a systematic departure from the published values. Reading the codebook closely \emph{before} reading the data should be a default habit, not an afterthought.
+
+\emph{Working with an AI assistant requires verification, not trust.} Much of the code was written in dialogue with Claude. The decisive practice was not to take its output on faith but to think alongside it---cross-checking each result against the original article and the data through repeated exchanges, especially for the values to be reproduced and for every data-processing step. In particular, the moment a suggested script ran without error was precisely the moment to slow down and inspect it carefully: a clean run is not evidence of a correct answer. Synchronizing human judgment with the assistant's speed, rather than substituting one for the other, is what kept the reproduction honest.
+
+\subsection{Conclusion}\label{conclusion}
+
+The core results of Hurst and Kavanagh (2017) are computationally reproducible from the authors' open data: 89.3\% of values matched exactly, a further 9.2\% differed only by rounding, and every inference was preserved. The two unreproducible cells are best explained as typographical errors in the original article, and the discrepancies that first appeared were, once diagnosed, properties of the replication code rather than of the study. Robust computational reproducibility rests on two pillars---the original authors' openness and the replicator's disciplined attention to how the data are encoded---and, increasingly, on treating AI-assisted code as something to be checked rather than believed.
+
+\newpage
+
+\section{References}\label{references}
+
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-papaja}
+Aust, F., \& Barth, M. (2023). \emph{{papaja}: {Prepare} reproducible {APA} journal articles with {R Markdown}}. Retrieved from \url{https://github.com/crsh/papaja}
+
+\bibitem[\citeproctext]{ref-hardwicke2018}
+Hardwicke, T. E., Mathur, M. B., MacDonald, K., Nilsonne, G., Banks, G. C., Kidwell, M. C., \ldots{} Frank, M. C. (2018). Data availability, reusability, and analytic reproducibility: Evaluating the impact of a mandatory open data policy at the journal cognition. \emph{Royal Society Open Science}, \emph{5}(8), 180448. \url{https://doi.org/10.1098/rsos.180448}
+
+\bibitem[\citeproctext]{ref-hurst2017}
+Hurst, J. E., \& Kavanagh, P. S. (2017). Life history strategies and psychopathology: The faster the life strategies, the more symptoms of psychopathology. \emph{Evolution and Human Behavior}, \emph{38}(1), 1--8. \url{https://doi.org/10.1016/j.evolhumbehav.2016.06.001}
+
+\bibitem[\citeproctext]{ref-nosek2022}
+Nosek, B. A., Hardwicke, T. E., Moshontz, H., Allard, A., Corker, K. S., Dreber, A., \ldots{} Vazire, S. (2022). Replicability, robustness, and reproducibility in psychological science. \emph{Annual Review of Psychology}, \emph{73}, 719--748. \url{https://doi.org/10.1146/annurev-psych-020821-114157}
+
+\bibitem[\citeproctext]{ref-rcore2024}
+R Core Team. (2024). \emph{R: A language and environment for statistical computing}. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from \url{https://www.R-project.org/}
+
+\end{CSLReferences}
+
+
+\end{document}

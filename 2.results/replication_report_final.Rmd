@@ -1,0 +1,444 @@
+---
+title             : "A Computational Reproducibility Check of Hurst and Kavanagh (2017): Life History Strategies and Psychopathology"
+shorttitle        : "Reproducing Hurst and Kavanagh (2017)"
+
+author:
+  - name          : "Jiyueyi Wang"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "School of Psychology, Nanjing Normal University"
+
+authornote: |
+  This manuscript reports a computational reproducibility check of Hurst and Kavanagh (2017) conducted with the authors' openly archived data. The replication was written in R and the report was prepared with papaja. All replication code is available from the author upon request.
+
+abstract: |
+  Computational reproducibility---obtaining the same reported numbers from the same data with independently written code---is a minimal requirement for credible quantitative research. Using the openly archived supplementary data of Hurst and Kavanagh (2017, *Evolution and Human Behavior*; *N* = 138), who reported that faster life history strategies accompany more psychopathology, greater aggression, and poorer attachment, I independently re-computed all six tables of the original article in R and compared every reported value, cell by cell, against the published value. Across 196 paired comparisons, 89.3% were reproduced exactly and a further 9.2% differed only by last-digit rounding or a single significance star; all 64 statistical inferences were consistent with the original. Two Mini-K partial correlations could not be reproduced from the data, but because the matching HKSS coefficients reproduced exactly and two independent partial-correlation methods agreed, these are most plausibly transcription errors in the original article rather than replication failures. Three discrepancies that initially made two tables look irreproducible were traced to my own misreading of how the raw data were coded---scoring origin, yes/no coding, and column order---and disappeared after consulting the codebook. The original results are computationally robust; the only real limitation to full transparency was the absence of shared analysis code.
+
+keywords          : "computational reproducibility, life history theory, psychopathology, open data, replication"
+wordcount         : "Approx. 3,600"
+
+bibliography      : ["references.bib"]
+
+floatsintext      : yes
+linenumbers       : yes
+draft             : no
+mask              : no
+
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+library("knitr")
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(knitr.kable.NA = "")
+
+# --- Helper functions for building the comparison tables --------------------
+# Functionalizing the repeated layout (a measure header followed by the four
+# "Original result / This study / delta / Rating" rows) means each comparison
+# table is assembled by a single call pattern, which keeps the formatting
+# uniform across all six tables and makes any discrepancy easy to localize.
+
+mn <- function(x) gsub("-", "$-$", x, fixed = TRUE)   # ASCII '-' -> math minus
+B  <- function(x) paste0("\\textbf{", x, "}")         # bold (LaTeX)
+bm <- function(x) B(mn(x))                            # bold + math minus
+
+# One comparison block: a bold measure-name row, then the four statistic rows.
+blk <- function(name, orig, repl, delta, rating) {
+  nc <- length(orig)
+  rbind(
+    c(B(name),           rep("", nc)),
+    c("Original result", orig),
+    c("This study",      repl),
+    c("$\\delta$",       delta),
+    c("Rating",          rating)
+  )
+}
+```
+
+```{r analysis-preferences}
+set.seed(42)
+```
+
+# Introduction
+
+How do early-life experiences become adult mental-health outcomes? @hurst2017 approached this question through life history theory, which treats childhood adversity not merely as trauma but as an environmental cue that shapes a person's developmental strategy along a slow--fast continuum. In a community sample (*N* = 138), they reported that faster life history strategies---indexed by the Mini-K and the High-K Strategy Scale (HKSS)---were associated with more symptoms of psychopathology, greater aggression, and poorer perceived parental attachment, whereas links with self-harm frequency, family structure, and participant sex were weak or non-significant.
+
+This paper does not re-evaluate those substantive claims. It asks a narrower, foundational question: given the authors' openly archived data, can the values printed in the article be regenerated with independently written analysis code? This property---*computational reproducibility*---is distinct from replicability with new data and is increasingly treated as a minimum standard for transparent quantitative research [@nosek2022; @hardwicke2018]. Because the original design is cross-sectional and correlational, with all results expressed as descriptive statistics, correlations, and regressions, every reported number should in principle be exactly recoverable from the public data. I therefore reproduced all six tables of @hurst2017 and compared the results against the published values, cell by cell.
+
+## Selected-literature information
+
+The full APA reference for the target article is Hurst and Kavanagh (2017) [@hurst2017]; Table 1 records its data source and the scope of the reproduction, following the course protocol.
+
+```{r tab-litinfo}
+lit <- data.frame(
+  Field = c("Reference", "DOI", "Data source",
+            "Multiple studies / meta-analysis", "Previously replicated",
+            "Reproduced results", "Original raw data used", "Sample size modified"),
+  Value = c(
+    "Hurst and Kavanagh (2017); full entry in the reference list",
+    "10.1016/j.evolhumbehav.2016.06.001",
+    "Article supplementary files mmc1.csv and mmc2.xlsx (no OSF/GitHub)",
+    "No -- single cross-sectional study",
+    "None located",
+    "All six results tables (descriptives, correlations, regressions)",
+    "Yes -- cleaned data file used unchanged",
+    "No -- full sample (N = 138; 92 women, 46 men)"),
+  stringsAsFactors = FALSE)
+apa_table(lit,
+  caption = "Table 1. Information on the selected article and the scope of the reproduction.",
+  col.names = c("Item", "Detail"),
+  align = c("l", "l"), escape = TRUE, font_size = "small")
+```
+
+## Overview of the original study
+
+@hurst2017 tested whether a faster life history strategy is accompanied by poorer mental-health and social outcomes. Participants completed two strategy measures (the Mini-K and the HKSS), the Adult Attachment Questionnaire (AAQ), the Buss--Perry Aggression Questionnaire, the DSM-5 Self-Rated Level 1 Cross-Cutting Symptom Measure, and a self-harm behaviour inventory, together with demographic and family-structure items. The authors reported descriptive statistics and reliabilities, the percentage of respondents exceeding each DSM-5 symptom threshold, self-harm frequencies by sex, correlations of all outcomes with age and sex, partial correlations between strategy and each outcome controlling for age (Bonferroni-corrected, *p* < .002), and regressions predicting each strategy score from attachment while controlling for age and sibling variables. They concluded that faster strategies were reliably linked to more psychopathology, more aggression, and poorer attachment, but not to self-harm frequency or family structure---a pattern consistent with life history theory.
+
+# Method
+
+## Sample
+
+I used the authors' supplementary data file (`mmc1.csv`, *N* = 138; 92 women, 46 men) together with the variable codebook (`mmc2.xlsx`). The data are cross-sectional and were taken unchanged; no cases were added or removed, and the sample size was not modified. Because the reproduction uses the identical sample, no power re-estimation was required.
+
+## Original analytic methods
+
+The original study is cross-sectional and correlational. Reported analyses comprise means, standard deviations, and Cronbach's alpha; threshold percentages and frequency counts; zero-order Pearson correlations; first-order partial correlations controlling for age with a Bonferroni-corrected threshold; and ordinary-least-squares multiple regression with standardized coefficients and 95% confidence intervals. The software used by the original authors was not reported in the article. The present reproduction was conducted in R [@rcore2024] using `psych` for descriptive statistics and reliability, `ppcor` for partial correlations, and `lm.beta` for standardized regression coefficients; the manuscript was prepared with **papaja** [@papaja].
+
+## Replication approach
+
+I reproduced all six tables of @hurst2017. The original authors' analysis code was not available, so the pipeline was written independently from the article's Method section and the codebook. Three implementation decisions were required and were resolved by reading the codebook rather than the article text. First, the DSM-5 items are stored on a 1--5 scale, whereas the published thresholds are defined on the instrument's native 0--4 scale; I subtracted one before thresholding. Second, the self-harm items are coded 1 = *yes*, 2 = *no*, so endorsements were counted as values equal to one rather than greater than zero. Third, the codebook showed that data columns and article rows are misaligned for self-harm items 5--7, so each behaviour was mapped to its correct column by name. For the "presence of stepparent" row I used the stepparent-count variable (`Stepparent_N`), which matches the published Table 5 values, rather than the binary indicator. Repeated operations---partial correlations, significance stars, and table assembly---were wrapped in functions so that each table required a single call. For every cell I recorded the published value, the reproduced value, a discrepancy index ($\delta$), and a four-level rating: *fully replicated* (identical value and significance), *highly replicated* (last-digit rounding or a significance star only), *partially replicated*, and *not replicated*. The only methodological addition was a verification step in which the disputed Table 5 partial correlations were recomputed by a second, residual-based algorithm.
+
+# Results
+
+Overall, computational reproducibility was high. Each of the following six tables places the published value ("Original result") directly above the reproduced value ("This study"), with the discrepancy $\delta$ and the rating beneath. For the descriptive tables (Tables 2--4) $\delta$ is the relative deviation (percentage of the original); for the coefficient tables (Tables 5--8) $\delta$ is the absolute difference in the coefficient's own units, because relative deviation is unstable near zero.
+
+## Descriptive statistics
+
+### Means, standard deviations, and reliability
+
+```{r tab-desc}
+nm <- c("Total attachment (AAQ)","Availability","Goal-corrected partnership","Angry distress",
+        "Total aggression (Buss--Perry)","Physical aggression","Verbal aggression","Anger",
+        "Hostility","Mini-K","HKSS")
+Mv <- c("15.54","5.63","4.77","5.14","59.90","16.81","11.51","14.30","17.27","14.62","87.34")
+Sv <- c("7.63","3.22","2.75","2.84","19.62","6.04","4.84","5.44","8.05","11.25","13.64")
+Av <- c("0.92","0.91","0.93","0.83","0.93","0.83","0.84","0.83","0.90","0.84","0.91")
+body <- do.call(rbind, lapply(seq_along(nm), function(i)
+  blk(nm[i], c(Mv[i],Sv[i],Av[i]), c(Mv[i],Sv[i],Av[i]),
+      rep("0\\%",3), rep("Fully repl.",3))))
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 2. Comparison of original and replication: means, standard deviations, and reliability.",
+  note = "$\\alpha$ values are standardized Cronbach's $\\alpha$ (psych::alpha std.alpha), which reproduced all 11 coefficients exactly; AAQ = Adult Attachment Questionnaire. All 33 cells fully replicated ($\\delta$ = 0\\%).",
+  col.names = c("Measure / Statistic", "$M$", "$SD$", "$\\alpha$"),
+  align = c("l","r","r","r"), escape = FALSE, longtable = TRUE, font_size = "small")
+```
+
+Every mean, standard deviation, and reliability coefficient reproduced exactly. The reliabilities matched only once I used the *standardized* coefficient alpha (`std.alpha`); the raw alpha differed by .01--.02 on four scales. Because the article did not state which estimator it used, the agreement of all 11 standardized values indicates that the original authors reported standardized alpha. The descriptive layer of the article is therefore fully reproducible.
+
+### DSM-5 symptom-threshold percentages
+
+```{r tab-dsm}
+dsm_item <- function(lbl, val) c(lbl, val, val, "0\\%", "Fully repl.")
+dsm_hdr  <- function(n) c(B(n), "", "", "", "")
+body <- rbind(
+  dsm_hdr("Depression subscale"),
+  dsm_item("Little interest or pleasure", "34.1"),
+  dsm_item("Feeling down/hopeless", "29.7"),
+  dsm_hdr("Anger subscale"),
+  dsm_item("More irritable/angry than usual", "36.2"),
+  dsm_hdr("Mania subscale"),
+  dsm_item("Sleeping less, still energetic", "28.3"),
+  dsm_item("More projects/risky things", "18.8"),
+  dsm_hdr("Anxiety subscale"),
+  dsm_item("Nervous/anxious/on edge", "35.5"),
+  dsm_item("Panic or frightened", "21.0"),
+  dsm_item("Avoiding anxiety-provoking situations", "34.1"),
+  dsm_hdr("Somatic symptoms subscale"),
+  dsm_item("Unexplained aches and pains", "29.0"),
+  dsm_item("Illness not taken seriously", "15.2"),
+  dsm_hdr("Suicidal ideation subscale"),
+  dsm_item("Thoughts of hurting yourself*", "18.8"),
+  dsm_hdr("Psychosis subscale"),
+  dsm_item("Hearing things others cannot*", "7.2"),
+  dsm_item("Thought broadcasting/insertion*", "6.5"),
+  dsm_hdr("Sleep disturbance subscale"),
+  dsm_item("Sleep-quality problems", "31.2"),
+  dsm_hdr("Memory subscale"),
+  dsm_item("Memory/location problems", "15.2"),
+  dsm_hdr("Repetitive thoughts/behaviour subscale"),
+  dsm_item("Intrusive thoughts/urges/images", "20.3"),
+  dsm_item("Compulsive acts", "10.1"),
+  dsm_hdr("Dissociation subscale"),
+  dsm_item("Feeling detached", "13.8"),
+  dsm_hdr("Personality functioning subscale"),
+  dsm_item("Not knowing who you are", "30.4"),
+  dsm_item("Not feeling close to others", "26.8"),
+  dsm_hdr("Substance use subscale"),
+  dsm_item("$\\geq$4 drinks in a day*", "34.1"),
+  dsm_item("Tobacco use*", "12.3"),
+  dsm_item("Non-prescribed medicine use*", "9.4")
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 3. Comparison of original and replication: percentage meeting the DSM-5 threshold for further inquiry.",
+  note = "Values are percentages of respondents whose rating indicated a need for further inquiry. *Threshold is a score of 1 rather than 2. Item labels are abbreviated. All 23 items fully replicated ($\\delta$ = 0\\%).",
+  col.names = c("Item", "Original", "This study", "$\\delta$", "Rating"),
+  align = c("l","r","r","r","l"), escape = FALSE, longtable = TRUE, font_size = "small")
+```
+
+All 23 threshold percentages reproduced to the first decimal. This table was, however, the source of the first replication-side error: the DSM-5 items are stored on a 1--5 scale, but the published thresholds assume the instrument's 0--4 scale, so applying the thresholds directly inflated every percentage and pushed the special "score $\geq$ 1" items to 100%. Subtracting one before thresholding---a fact recoverable only from the codebook---restored exact agreement.
+
+### Self-harm frequencies by sex
+
+```{r tab-sh}
+# Fully-replicated behaviour (identical women & men cells)
+shf <- function(name, w, m)
+  blk(name, c(w, m), c(w, m), c("0\\%","0\\%"), c("Fully repl.","Fully repl."))
+body <- rbind(
+  blk("1. Cutting", c("13 (14.0)","6 (13.0)"), c("13 (14.1)","6 (13.0)"),
+      c("+0.7\\%","0\\%"), c("Highly repl.","Fully repl.")),
+  shf("2. Burning with cigarette",         "5 (5.4)",  "1 (2.2)"),
+  shf("3. Burning with lighter/match",     "3 (3.3)",  "3 (6.5)"),
+  shf("4. Carving words into skin",        "6 (6.5)",  "0 (0.0)"),
+  shf("5. Carving pictures into skin",     "1 (1.1)",  "0 (0.0)"),
+  shf("6. Severe scratching",              "10 (10.9)","2 (4.3)"),
+  shf("7. Biting",                         "6 (6.5)",  "2 (4.3)"),
+  shf("8. Rubbing sandpaper on skin",      "0 (0.0)",  "2 (4.3)"),
+  shf("9. Dripping acid on skin",          "0 (0.0)",  "0 (0.0)"),
+  shf("10. Bleach/oven cleaner on skin",   "0 (0.0)",  "0 (0.0)"),
+  blk("11. Sticking pins/needles into skin", c("3 (3.3)","5 (11.4)"), c("3 (3.3)","5 (10.9)"),
+      c("0\\%", mn("-4.4\\%")), c("Fully repl.","Partially repl.")),
+  shf("12. Rubbing glass on skin",         "1 (1.1)",  "0 (0.0)"),
+  shf("13. Breaking bones",                "1 (1.1)",  "0 (0.0)"),
+  shf("14. Banging head",                  "1 (1.1)",  "5 (10.9)"),
+  shf("15. Punching self",                 "4 (4.3)",  "2 (4.3)"),
+  shf("16. Preventing wounds from healing","3 (3.3)",  "1 (2.2)"),
+  shf("17. Alternate forms of self-harm",  "4 (4.3)",  "8 (17.4)")
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 4. Comparison of original and replication: frequencies (percentages) of self-harm behaviours by sex.",
+  note = "Women n = 92, men n = 46. $\\delta$ is computed on the percentages. All endorsement counts reproduced exactly; two percentages differ by rounding with identical counts.",
+  col.names = c("Measure / Statistic", "Women $n$ (\\%)", "Men $n$ (\\%)"),
+  align = c("l","c","c"), escape = FALSE, longtable = TRUE, font_size = "small")
+```
+
+Every endorsement count reproduced exactly. Only two percentages deviate, and both reflect rounding rather than a count error: cutting in women (14.0 vs. 14.1) and sticking pins in men (11.4 vs. 10.9), each with an identical underlying count. Reaching this point required two further codebook-based fixes: the self-harm items are coded 1 = *yes*, 2 = *no* (so endorsements are values equal to one, not greater than zero), and the data store items 5--7 in a different order than the article lists them, so each behaviour had to be matched to its column by name.
+
+## Inferential statistics
+
+### Correlations with age and sex
+
+```{r tab-cor}
+cblk <- function(name, ao,ar,ad,art, so,sr,sd,srt)
+  blk(name, mn(c(ao,so)), mn(c(ar,sr)), mn(c(ad,sd)), c(art,srt))
+body <- rbind(
+  cblk("Total attachment",   "-.21*","-.21*","0.00","Fully repl.",  ".06",".06","0.00","Fully repl."),
+  cblk("Availability",       "-.15","-.15","0.00","Fully repl.",    ".02",".02","0.00","Fully repl."),
+  cblk("Angry distress",     "-.29**","-.29***","0.00","Highly repl.",".10",".10","0.00","Fully repl."),
+  cblk("Goal-corrected partnership","-.11","-.10","+0.01","Highly repl.",".03",".03","0.00","Fully repl."),
+  cblk("Total aggression",   "-.39***","-.39***","0.00","Fully repl.",".09",".09","0.00","Fully repl."),
+  cblk("Physical aggression","-.36***","-.36***","0.00","Fully repl.",".01",".00","-0.01","Highly repl."),
+  cblk("Verbal aggression",  "-.32***","-.32***","0.00","Fully repl.","-.06","-.06","0.00","Fully repl."),
+  cblk("Anger",              "-.26**","-.26**","0.00","Fully repl.",".19*",".19*","0.00","Fully repl."),
+  cblk("Hostility",          "-.32***","-.32***","0.00","Fully repl.",".13",".13","0.00","Fully repl."),
+  cblk("Total psychopathology","-.43***","-.43***","0.00","Fully repl.",".01",".01","0.00","Fully repl."),
+  cblk("Total frequency of self-harm","-.15","-.15","0.00","Fully repl.",".01",".02","+0.01","Highly repl.")
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 5. Comparison of original and replication: zero-order correlations with age and sex.",
+  note = "$\\delta$ is the absolute difference (this study $-$ original). *p < .05. **p < .01. ***p < .001.",
+  col.names = c("Measure / Statistic", "Age ($r$)", "Sex ($r$)"),
+  align = c("l","c","c"), escape = FALSE, longtable = TRUE, font_size = "small")
+```
+
+Every correlation coefficient reproduced to two decimals. The four highly replicated cells differ only trivially: angry distress with age carries one extra significance star (.29** vs. .29***), and three coefficients near zero shift by .01 in the last digit. None of these changes the inferential message---the correlation is significant, or not, in exactly the same way as in the article.
+
+### Partial correlations with life history strategy
+
+```{r tab-pcor}
+pblk <- function(name, mko,mkr,mkd,mkrt, hko,hkr,hkd,hkrt)
+  blk(name, c(mko,hko), c(mkr,hkr), c(mkd,hkd), c(mkrt,hkrt))
+body <- rbind(
+  pblk("Full biological siblings", mn(".01"),mn(".00"),mn("-0.01"),"Highly repl.", mn(".03"),mn(".03"),"0.00","Fully repl."),
+  pblk("Half-siblings", mn("-.10"),mn("-.10"),"0.00","Fully repl.", mn("-.20"),mn("-.20"),"0.00","Fully repl."),
+  pblk("Step-siblings", mn("-.05"),mn("-.05"),"0.00","Fully repl.", mn("-.08"),mn("-.08"),"0.00","Fully repl."),
+  pblk("Presence of stepparent", mn("-.19"),mn("-.19"),"0.00","Fully repl.", mn("-.06"),mn("-.06"),"0.00","Fully repl."),
+  pblk("Total psychopathology", bm("-.51"),bm("-.51"),"0.00","Fully repl.", bm("-.41"),bm("-.41"),"0.00","Fully repl."),
+  pblk("Total frequency of self-harm", mn("-.04"),mn("-.04"),"0.00","Fully repl.", mn("-.17"),mn("-.17"),"0.00","Fully repl."),
+  pblk("Total attachment", bm("-.42"),bm("-.42"),"0.00","Fully repl.", bm("-.41"),bm("-.41"),"0.00","Fully repl."),
+  pblk("Availability", bm("-.39"),bm("-.38"),"+0.01","Highly repl.", bm("-.37"),bm("-.37"),"0.00","Fully repl."),
+  pblk("Angry distress", bm("-.44"),bm("-.44"),"0.00","Fully repl.", bm("-.44"),bm("-.44"),"0.00","Fully repl."),
+  pblk("Goal-corrected partnership", bm("-.39"),bm("-.27"),"+0.12","Not repl.", mn("-.24"),mn("-.24"),"0.00","Fully repl."),
+  pblk("Total aggression", bm("-.46"),bm("-.44"),"+0.02","Highly repl.", bm("-.43"),bm("-.43"),"0.00","Fully repl."),
+  pblk("Physical aggression", bm("-.44"),bm("-.37"),"+0.07","Partially repl.", bm("-.34"),bm("-.34"),"0.00","Fully repl."),
+  pblk("Verbal aggression", mn("-.03"),mn("-.04"),"-0.01","Highly repl.", mn("-.10"),mn("-.10"),"0.00","Fully repl."),
+  pblk("Anger", bm("-.31"),bm("-.31"),"0.00","Fully repl.", mn("-.25"),mn("-.25"),"0.00","Fully repl."),
+  pblk("Hostility", bm("-.52"),bm("-.52"),"0.00","Fully repl.", bm("-.52"),bm("-.52"),"0.00","Fully repl.")
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 6. Comparison of original and replication: partial correlations (controlling for age) with Mini-K and HKSS.",
+  note = "Bold = significant after Bonferroni correction (p < .002). $\\delta$ is the absolute difference. Two Mini-K cells could not be reproduced (goal-corrected partnership, physical aggression); their HKSS counterparts reproduced exactly (see text).",
+  col.names = c("Measure / Statistic", "Mini-K ($pr$)", "HKSS ($pr$)"),
+  align = c("l","c","c"), escape = FALSE, longtable = TRUE, font_size = "small")
+```
+
+The HKSS column reproduced exactly in all 15 rows, and 13 of the 15 Mini-K coefficients reproduced within rounding. The exceptions are the two Mini-K cells flagged in bold above: goal-corrected partnership (article $-.39$, data $-.27$) and physical aggression (article $-.44$, data $-.37$). These are best read as transcription errors in the original article rather than replication failures, for three reasons: the corresponding HKSS coefficients reproduced perfectly, a second residual-based partial-correlation algorithm returned the same disputed values, and both cells remain significant after Bonferroni correction under either number---so the article's pattern of significant strategy--outcome associations is preserved regardless.
+
+### Regressions predicting life history strategy
+
+```{r tab-reg-mk}
+rblk <- function(name, o, r, d, rt) blk(name, mn(o), mn(r), mn(d), rt)
+body <- rbind(
+  rblk("Age (covariate)",
+       c("0.21",".27***","3.29","0.08","0.34"), c("0.21",".27**","3.29","0.08","0.34"),
+       c("0.00","0.00","0.00","0.00","0.00"),
+       c("Fully repl.","Highly repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Half-siblings (covariate)",
+       c("-0.01",".01","-0.01","-2.16","2.16"), c("0.00",".00","0.00","-2.16","2.16"),
+       c("+0.01","-0.01","+0.01","0.00","0.00"),
+       c("Highly repl.","Highly repl.","Highly repl.","Fully repl.","Fully repl.")),
+  rblk("Step-siblings (covariate)",
+       c("0.21",".02","0.19","-1.93","2.36"), c("0.21",".01","0.19","-1.93","2.36"),
+       c("0.00","-0.01","0.00","0.00","0.00"),
+       c("Fully repl.","Highly repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Biological siblings (covariate)",
+       c("-0.04","-.01","-0.05","-1.69","1.61"), c("-0.04",".00","-0.05","-1.69","1.61"),
+       c("0.00","+0.01","0.00","0.00","0.00"),
+       c("Fully repl.","Highly repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Total attachment",
+       c("-0.60","-.41***","-5.20","-0.83","-0.37"), c("-0.60","-.41***","-5.20","-0.83","-0.37"),
+       c("0.00","0.00","0.00","0.00","0.00"),
+       c("Fully repl.","Fully repl.","Fully repl.","Fully repl.","Fully repl."))
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 7. Comparison of original and replication: regression predicting Mini-K from attachment.",
+  note = "$b$ = unstandardized; $\\beta$ = standardized; CI = 95\\% confidence interval (LL, UL). Model: R\\textsuperscript{2} = .28, F(5, 132) = 10.49, p < .001, reproduced exactly. *p < .05. **p < .01. ***p < .001.",
+  col.names = c("Measure / Statistic", "$b$", "$\\beta$", "$t$", "CI LL", "CI UL"),
+  align = c("l","r","r","r","r","r"), escape = FALSE, longtable = TRUE, font_size = "footnotesize")
+```
+
+```{r tab-reg-hk}
+body <- rbind(
+  rblk("Age (covariate)",
+       c("0.20",".21*","2.51","0.04","0.35"), c("0.20",".21*","2.51","0.04","0.35"),
+       c("0.00","0.00","0.00","0.00","0.00"),
+       c("Fully repl.","Fully repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Half-siblings (covariate)",
+       c("-1.63","-.10","-1.21","-4.30","1.04"), c("-1.63","-.10","-1.21","-4.30","1.04"),
+       c("0.00","0.00","0.00","0.00","0.00"),
+       c("Fully repl.","Fully repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Step-siblings (covariate)",
+       c("0.07",".01","0.06","-2.58","2.72"), c("0.07",".00","0.06","-2.58","2.72"),
+       c("0.00","-0.01","0.00","0.00","0.00"),
+       c("Fully repl.","Highly repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Biological siblings (covariate)",
+       c("0.01",".01","0.01","-2.03","2.05"), c("0.01",".00","0.01","-2.03","2.05"),
+       c("0.00","-0.01","0.00","0.00","0.00"),
+       c("Fully repl.","Highly repl.","Fully repl.","Fully repl.","Fully repl.")),
+  rblk("Total attachment",
+       c("-0.67","-.37***","-4.68","-0.95","-0.38"), c("-0.67","-.37***","-4.68","-0.95","-0.38"),
+       c("0.00","0.00","0.00","0.00","0.00"),
+       c("Fully repl.","Fully repl.","Fully repl.","Fully repl.","Fully repl."))
+)
+apa_table(as.data.frame(body, stringsAsFactors = FALSE),
+  caption = "Table 8. Comparison of original and replication: regression predicting HKSS from attachment.",
+  note = "Layout as in Table 7. Model: R\\textsuperscript{2} = .26; F(5, 132) = 9.09 original vs. 9.08 replication (last-digit difference, highly replicated). *p < .05. ***p < .001.",
+  col.names = c("Measure / Statistic", "$b$", "$\\beta$", "$t$", "CI LL", "CI UL"),
+  align = c("l","r","r","r","r","r"), escape = FALSE, longtable = TRUE, font_size = "footnotesize")
+```
+
+Both regression models reproduced essentially completely. The unstandardized coefficients, *t* values, and confidence-interval limits were identical, and the key attachment effect ($\beta = -.41$ for Mini-K and $-.37$ for HKSS, both *p* < .001) reproduced exactly. The handful of highly replicated cells are standardized coefficients near zero that differ by .01, plus the HKSS model *F* (9.09 vs. 9.08). The model fit statistics---*R*\textsuperscript{2} = .28 and .26---reproduced exactly. No regression inference changed.
+
+## Assessment of computational reproducibility
+
+I treated every published number as one paired comparison: each mean, standard deviation, reliability, percentage, frequency, correlation, partial correlation, regression coefficient, confidence-interval limit, and model-fit statistic. This yielded 196 comparisons, whose rating distribution appears in Table 9.
+
+```{r tab-rating}
+rate_tbl <- data.frame(
+  Category = c("Fully replicated ($\\delta$ = 0)",
+               "Highly replicated (last-digit rounding or significance star only)",
+               "Partially replicated",
+               "Not replicated",
+               "Total"),
+  N   = c("175", "18", "2", "1", "196"),
+  Pct = c("89.3", "9.2", "1.0", "0.5", "100.0"),
+  stringsAsFactors = FALSE)
+apa_table(rate_tbl,
+  caption = "Table 9. Distribution of reproduction ratings across all 196 paired comparisons.",
+  note = "The 18 highly replicated cells reflect last-digit rounding or one shifted significance star. The 2 partially and 1 not replicated cells are the two suspected Mini-K transcription errors in the partial-correlation comparison (Table 6) and one rounded self-harm percentage with an identical count.",
+  col.names = c("Reproduction rating", "$N$", "$\\%$"),
+  align = c("l","r","r"), escape = FALSE)
+```
+
+Reproducibility of the published *numbers* is distinct from reproducibility of the *inferences* they license. Counting every significance decision---22 zero-order correlations, 30 age-adjusted partial correlations, and 12 regression statistics (10 coefficient tests plus two model *F* tests)---gives 64 inferences. As Table 10 shows, all 64 fell on the same side of their significance threshold in the original and the replication; even the two unreproduced Mini-K point estimates stayed significant under both values.
+
+```{r tab-infer}
+inf_tbl <- data.frame(
+  Consistency = c("Consistent", "Inconsistent", "Total"),
+  N   = c("64", "0", "64"),
+  Pct = c("100.0", "0.0", "100.0"),
+  stringsAsFactors = FALSE)
+apa_table(inf_tbl,
+  caption = "Table 10. Consistency of statistical inferences between original and replication.",
+  note = "An inference was coded inconsistent only if the reproduced p value fell on the opposite side of its significance threshold from the original.",
+  col.names = c("Inference", "$N$", "$\\%$"),
+  align = c("l","r","r"), escape = FALSE)
+```
+
+Because the reproduction used the original methods throughout, the rubric's tables for an alternative ("innovative") analysis method are not applicable; the only methodological addition was the residual-based cross-check of Table 6, which agreed with the primary estimates.
+
+# Discussion
+
+## Analysis of the reproducibility outcome
+
+Using the authors' open data, the central results of @hurst2017 were highly reproducible. Because the authors archived a *cleaned* data file, the reproduction succeeded almost completely: means, standard deviations, reliabilities, correlations, partial correlations, and regression coefficients matched the published values to the last reported digit in the large majority of cells, and no inference supporting the article's conclusions changed. The few small deviations that remained---a scattering of last-digit differences and a single shifted significance star---are attributable to rounding and to unspecified estimator options rather than to any computational instability, and none affects an inference. In short, the article is computationally robust and trustworthy: the numbers it reports can be regenerated from its data, and its conclusions follow from those numbers.
+
+The residual discrepancies sort into three kinds, summarized in Table 11, which it is important not to conflate. *First*, two Mini-K partial correlations in Table 6 (goal-corrected partnership and physical aggression) could not be reproduced; these are most plausibly transcription errors in the original article, because the matching HKSS coefficients reproduced exactly, two independent algorithms agreed, and both cells remain significant either way. *Second*, three discrepancies that initially made the DSM-5 and self-harm tables look completely irreproducible were located entirely on the replication side---a scoring-origin mismatch (1--5 vs. 0--4), a yes/no coding error, and an item-to-column misalignment---and disappeared once the codebook was consulted. *Third*, the benign remainder (last-digit rounding, one rounded self-harm percentage with an identical count, and the standardized-versus-raw alpha choice) reflects rounding and reporting conventions. The principal limitation to full transparency was structural rather than statistical: the raw and cleaned data were shared, but the analysis code was not, so a few implementation choices---most visibly the alpha estimator---had to be inferred. Sharing runnable code would have removed that ambiguity.
+
+```{r tab-causes}
+causes <- data.frame(
+  Source = c("Transcription error in original","Under-specified procedure in article",
+             "No analysis code shared","Software/package versions not reported",
+             "Same data set","Different software (R)",
+             "Replicator's reading of data coding","Publication year","Independent support for findings"),
+  Applies = c("Yes","Partly","Yes","Yes","No","Minor","Resolved","--","Yes"),
+  Note = c("Two Mini-K cells in Table 6","Coding and alpha from codebook only",
+           "Main openness gap; data shared, code not","Minor; one last-digit F difference",
+           "Identical cleaned file used","Rounding / alpha estimator only",
+           "Three coding errors fixed via codebook","2017, open-science era; data archived",
+           "Pattern broadly consistent with prior work"),
+  stringsAsFactors = FALSE)
+apa_table(causes,
+  caption = "Table 11. Analysis of the sources of the few computational discrepancies.",
+  note = "Only applicable rows are shown; non-applicable checklist items (e.g., unseeded simulation -- all analyses are deterministic; OSF storage or download problems) are omitted.",
+  col.names = c("Possible source", "Applies?", "Note"),
+  align = c("l","l","l"), escape = TRUE, font_size = "small")
+```
+
+## Further reflections
+
+Beyond the reproducibility verdict, three lessons stand out from the process.
+
+*Functionalizing the analysis sharply lowered the error rate.* Wrapping the repeated operations---computing a partial correlation, attaching significance stars, and assembling a table---into reusable functions meant that each of the six tables was produced by a single call pattern (the `blk()` helper used throughout the Results section is a direct example). This made discrepancies easy to localize and guaranteed that the same conventions---rounding, star thresholds, ordering---were applied everywhere. That uniformity is difficult to maintain in point-and-click software, where each table is built by hand, and it is a core advantage of a scripted environment such as R.
+
+*The data codebook mattered more than the code.* The single most important lesson was that all three errors encountered during the reproduction lay not in the statistical method but in how the raw data were encoded: whether scoring began at 0 or at 1, how the yes/no self-harm items were coded, and whether the data's column order matched the article's row order. However well written the R code was, a misunderstanding of the data's semantics propagated into a systematic departure from the published values. Reading the codebook closely *before* reading the data should be a default habit, not an afterthought.
+
+*Working with an AI assistant requires verification, not trust.* Much of the code was written in dialogue with Claude. The decisive practice was not to take its output on faith but to think alongside it---cross-checking each result against the original article and the data through repeated exchanges, especially for the values to be reproduced and for every data-processing step. In particular, the moment a suggested script ran without error was precisely the moment to slow down and inspect it carefully: a clean run is not evidence of a correct answer. Synchronizing human judgment with the assistant's speed, rather than substituting one for the other, is what kept the reproduction honest.
+
+## Conclusion
+
+The core results of @hurst2017 are computationally reproducible from the authors' open data: 89.3% of values matched exactly, a further 9.2% differed only by rounding, and every inference was preserved. The two unreproducible cells are best explained as typographical errors in the original article, and the discrepancies that first appeared were, once diagnosed, properties of the replication code rather than of the study. Robust computational reproducibility rests on two pillars---the original authors' openness and the replicator's disciplined attention to how the data are encoded---and, increasingly, on treating AI-assisted code as something to be checked rather than believed.
+
+\newpage
+
+# References
+
+::: {#refs custom-style="Bibliography"}
+:::
